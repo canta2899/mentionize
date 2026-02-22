@@ -1,0 +1,57 @@
+{
+  "name": "mentionize",
+  "author": "canta2899",
+  "version": "0.0.0",
+  "description": "A dependency-free React mention input with support for multiple triggers, async search, and full customization",
+  "type": "module",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "keywords": [
+    "react",
+    "mention",
+    "input",
+    "textarea",
+    "autocomplete",
+    "typeahead"
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/bun": "latest",
+    "react": "^19",
+    "react-dom": "^19",
+    "typescript": "^5"
+  },
+  "scripts": {
+    "dev": "bun --hot examples/server.ts",
+    "build": "bun run build:esm && bun run build:cjs && bun run build:types",
+    "build:esm": "bun build ./src/index.ts --outdir=dist/esm --target=browser --format=esm --external react --external react-dom --sourcemap",
+    "build:cjs": "bun build ./src/index.ts --outdir=dist/cjs --target=browser --format=cjs --external react --external react-dom --sourcemap",
+    "build:types": "tsc -p tsconfig.build.json && cp dist/esm/*.d.ts dist/cjs/",
+    "test": "bun test",
+    "prepublishOnly": "bun run build"
+  }
+}
