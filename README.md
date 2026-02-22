@@ -1,10 +1,13 @@
 # Mentionize
 
-A React library for building mention inputs with support for multiple triggers, async search, and full customization. It provides a transparent textarea overlaid on a highlighted div to display mentions, and a dropdown for suggestions. With zero dependencies.
+A React library for building mention inputs with support for multiple triggers, async search, and full customization. It provides a transparent textarea overlaid on a highlighted div to display mentions, and a dropdown for suggestions. With zero dependencies other than React.
 
 ## Install
 
 ```bash
+npm install react
+npm install react-dom
+
 npm install mentionize
 ```
 
