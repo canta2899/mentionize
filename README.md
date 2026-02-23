@@ -1,4 +1,11 @@
-# Mentionize
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+
+<p align="center">
+    <img src="./.github/assets/logo.png" width="700"/>
+</p>
+<h1 align="center">
+    Mentionize
+</h1>
 
 A React library for building mention inputs with support for multiple triggers, async search, and full customization. It provides a transparent textarea overlaid on a highlighted div to display mentions, and a dropdown for suggestions. With zero dependencies other than React.
 
