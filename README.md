@@ -1,8 +1,9 @@
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
-<p align="center">
-    <img src="./.github/assets/logo.png" width="700"/>
-</p>
+<div align="center">
+  <img src="./.github/assets/logo.png" width="300" alt="Mentionize Logo" />
+</div>
+
 <h1 align="center">
     Mentionize
 </h1>
