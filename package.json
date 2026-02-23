@@ -2,6 +2,10 @@
   "name": "mentionize",
   "author": "canta2899",
   "version": "0.0.5",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/canta2899/mentionize"
+  },
   "description": "A dependency-free React mention input with support for multiple triggers, async search, and full customization",
   "type": "module",
   "main": "./dist/cjs/index.js",
