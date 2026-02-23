@@ -41,6 +41,7 @@ jobs:
         run: bun run build
       - name: Publish to npm
         run: |
+          npm config set registry https://registry.npmjs.org/
           npm config set //registry.npmjs.org/:_authToken=unused
           npm publish --access public --provenance
         env:
