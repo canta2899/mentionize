@@ -6,6 +6,7 @@ interface MentionHighlighterProps {
   mentions: ActiveMention[];
   triggers: MentionTrigger<any>[];
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
+  getItemForMention?: (triggerChar: string, key: string) => unknown;
   className?: string;
   style?: React.CSSProperties;
 }
@@ -26,6 +27,7 @@ export const MentionHighlighter: React.FC<MentionHighlighterProps> = ({
   mentions,
   triggers,
   textareaRef,
+  getItemForMention,
   className,
   style,
 }) => {
@@ -50,9 +52,9 @@ export const MentionHighlighter: React.FC<MentionHighlighterProps> = ({
     const sorted = mentions.slice().sort((a, b) => a.start - b.start);
     if (!sorted.length) return textToNodes(visible);
 
-    const classMap = new Map<string, string>();
+    const triggerMap = new Map<string, MentionTrigger<any>>();
     for (const t of triggers) {
-      classMap.set(t.trigger, t.mentionClassName ?? "mentionize-mention");
+      triggerMap.set(t.trigger, t);
     }
 
     const nodes: React.ReactNode[] = [];
@@ -65,7 +67,21 @@ export const MentionHighlighter: React.FC<MentionHighlighterProps> = ({
       }
 
       const mentionText = visible.slice(m.start, m.end);
-      const cls = classMap.get(m.trigger) ?? "mentionize-mention";
+      const t = triggerMap.get(m.trigger);
+      let cls = "mentionize-mention";
+      if (t) {
+        if (typeof t.mentionClassName === "function") {
+          const item = getItemForMention?.(m.trigger, m.key) ?? null;
+          cls = t.mentionClassName({
+            key: m.key,
+            displayText: m.displayText,
+            trigger: m.trigger,
+            item,
+          });
+        } else if (t.mentionClassName) {
+          cls = t.mentionClassName;
+        }
+      }
       nodes.push(
         React.createElement(
           "span",
@@ -85,7 +101,7 @@ export const MentionHighlighter: React.FC<MentionHighlighterProps> = ({
       nodes.push(...textToNodes(visible.slice(last)));
     }
     return nodes;
-  }, [visible, mentions, triggers]);
+  }, [visible, mentions, triggers, getItemForMention]);
 
   // After render, neutralize horizontal box-model impact of mention spans
   // so user-applied padding/border/margin don't shift overlay text relative to the textarea.

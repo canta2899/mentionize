@@ -41,6 +41,7 @@ export const MentionInput = forwardRef<HTMLTextAreaElement, MentionInputProps>(
       highlighterClassName,
       dropdownClassName,
       dropdownWidth = 250,
+      loadingText,
       renderDropdown,
       "aria-label": ariaLabel,
       "aria-describedby": ariaDescribedBy,
@@ -142,6 +143,7 @@ export const MentionInput = forwardRef<HTMLTextAreaElement, MentionInputProps>(
           mentions={engine.mentions}
           triggers={triggers}
           textareaRef={textareaRef}
+          getItemForMention={engine.getItemForMention}
           className={highlighterClassName}
           style={SHARED_STYLE}
         />
@@ -207,6 +209,7 @@ export const MentionInput = forwardRef<HTMLTextAreaElement, MentionInputProps>(
               onSelect={handleSelect}
               onLoadMore={engine.searchHasMore ? engine.loadMore : undefined}
               loading={engine.searchLoading}
+              loadingText={loadingText}
               position={dropdownPos}
               width={dropdownWidth}
               className={dropdownClassName}

@@ -9,6 +9,7 @@ interface MentionDropdownProps {
   onSelect: (item: unknown) => void;
   onLoadMore?: () => void;
   loading: boolean;
+  loadingText?: string;
   position: CaretPosition;
   width: number;
   className?: string;
@@ -22,6 +23,7 @@ export const MentionDropdown: React.FC<MentionDropdownProps> = ({
   onSelect,
   onLoadMore,
   loading,
+  loadingText,
   position,
   width,
   className,
@@ -93,6 +95,9 @@ export const MentionDropdown: React.FC<MentionDropdownProps> = ({
     >
       {items.map((item, i) => {
         const isHighlighted = i === highlightedIndex;
+        const optCls = typeof trigger.optionClassName === "function"
+          ? trigger.optionClassName(item)
+          : trigger.optionClassName;
 
         if (trigger.renderOption) {
           return (
@@ -100,6 +105,7 @@ export const MentionDropdown: React.FC<MentionDropdownProps> = ({
               key={i}
               role="option"
               aria-selected={isHighlighted}
+              className={optCls}
               data-mentionize-option-index={i}
               data-mentionize-option-highlighted={isHighlighted || undefined}
               onMouseEnter={() => onHighlight(i)}
@@ -115,6 +121,7 @@ export const MentionDropdown: React.FC<MentionDropdownProps> = ({
             key={i}
             role="option"
             aria-selected={isHighlighted}
+            className={optCls}
             data-mentionize-option-index={i}
             data-mentionize-option=""
             data-mentionize-option-highlighted={isHighlighted || undefined}
@@ -126,7 +133,7 @@ export const MentionDropdown: React.FC<MentionDropdownProps> = ({
         );
       })}
       {loading && (
-        <div data-mentionize-loading="">Loading...</div>
+        <div data-mentionize-loading="">{loadingText ?? "Loading..."}</div>
       )}
       {onLoadMore && !loading && (
         <div ref={sentinelRef} style={{ height: 1 }} aria-hidden />

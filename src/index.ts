@@ -6,6 +6,7 @@ export { useCaretPosition } from "./useCaretPosition.ts";
 
 export type {
   MentionTrigger,
+  MentionItemData,
   MentionInputProps,
   ActiveMention,
   DropdownRenderProps,

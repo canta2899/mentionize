@@ -1,5 +1,12 @@
 import type React from "react";
 
+export interface MentionItemData {
+  key: string;
+  displayText: string;
+  trigger: string;
+  item: unknown;
+}
+
 export interface MentionTrigger<T = unknown> {
   /** The character(s) that activate this trigger (e.g., "@", "#") */
   trigger: string;
@@ -23,10 +30,14 @@ export interface MentionTrigger<T = unknown> {
     item: T,
     highlighted: boolean
   ) => React.ReactNode;
+  /** CSS class for dropdown options, or a function for conditional styling per item */
+  optionClassName?: string | ((item: T) => string);
   /** Custom mention highlight rendering */
-  renderMention?: (displayText: string) => React.ReactNode;
-  /** CSS class for highlighted mentions in the overlay */
-  mentionClassName?: string;
+  renderMention?: (displayText: string, item?: unknown) => React.ReactNode;
+  /** CSS class for highlighted mentions in the overlay, or a function for conditional styling */
+  mentionClassName?: string | ((mention: MentionItemData) => string);
+  /** Action trigger: called instead of inserting a mention. Return string to insert as plain text, or null to cancel. */
+  onSelect?: (item: T) => Promise<string | null> | string | null;
 }
 
 export interface MentionInputProps {
@@ -50,6 +61,8 @@ export interface MentionInputProps {
   dropdownClassName?: string;
   /** Dropdown width in pixels */
   dropdownWidth?: number;
+  /** Text shown while loading async results (default: "Loading...") */
+  loadingText?: string;
   /** Full custom dropdown rendering */
   renderDropdown?: (props: DropdownRenderProps) => React.ReactNode;
   "aria-label"?: string;

@@ -1,5 +1,5 @@
 import { test, expect, describe } from "bun:test";
-import type { MentionTrigger } from "../src/types.ts";
+import type { MentionTrigger, MentionItemData } from "../src/types.ts";
 
 const userTrigger: MentionTrigger<{ id: string; name: string }> = {
   trigger: "@",
@@ -108,5 +108,114 @@ describe("pattern matching", () => {
     const re = new RegExp(userTrigger.pattern.source, "g");
     const match = re.exec("Hello @Alice Johnson");
     expect(match).toBeNull();
+  });
+});
+
+describe("conditional mentionClassName", () => {
+  test("string mentionClassName returns the string", () => {
+    const trigger: MentionTrigger<{ id: string; name: string }> = {
+      ...userTrigger,
+      mentionClassName: "my-class",
+    };
+    expect(trigger.mentionClassName).toBe("my-class");
+  });
+
+  test("function mentionClassName is called with MentionItemData", () => {
+    const calls: MentionItemData[] = [];
+    const trigger: MentionTrigger<{ id: string; name: string; role: string }> = {
+      trigger: "@",
+      displayText: (u) => u.name,
+      serialize: (u) => `@[${u.name}](user:${u.id})`,
+      pattern: /@\[([^\]]+)\]\(user:([^)]+)\)/g,
+      parseMatch: (m) => ({ displayText: m[1]!, key: m[2]! }),
+      options: [
+        { id: "u1", name: "Alice", role: "Engineer" },
+      ],
+      mentionClassName: (mention) => {
+        calls.push(mention);
+        const user = mention.item as { role: string } | null;
+        return user?.role === "Engineer" ? "mention-engineer" : "mention-default";
+      },
+    };
+
+    const fn = trigger.mentionClassName as (mention: MentionItemData) => string;
+    const result = fn({
+      key: "u1",
+      displayText: "Alice",
+      trigger: "@",
+      item: { id: "u1", name: "Alice", role: "Engineer" },
+    });
+    expect(result).toBe("mention-engineer");
+    expect(calls).toHaveLength(1);
+    expect(calls[0]!.key).toBe("u1");
+  });
+
+  test("function mentionClassName returns default for unknown role", () => {
+    const fn = (mention: MentionItemData) => {
+      const user = mention.item as { role: string } | null;
+      return user?.role === "Engineer" ? "mention-engineer" : "mention-default";
+    };
+
+    const result = fn({
+      key: "u2",
+      displayText: "Bob",
+      trigger: "@",
+      item: { id: "u2", name: "Bob", role: "Designer" },
+    });
+    expect(result).toBe("mention-default");
+  });
+});
+
+describe("action trigger onSelect", () => {
+  const commandTrigger: MentionTrigger<{ id: string; label: string }> = {
+    trigger: "/",
+    displayText: (cmd) => cmd.label,
+    serialize: (cmd) => `/[${cmd.label}](cmd:${cmd.id})`,
+    pattern: /\/\[([^\]]+)\]\(cmd:([^)]+)\)/g,
+    parseMatch: (m) => ({ displayText: m[1]!, key: m[2]! }),
+    options: [
+      { id: "c1", label: "Insert Date" },
+      { id: "c2", label: "Cancel" },
+    ],
+    onSelect: (cmd) => {
+      if (cmd.id === "c1") return "2026-02-23";
+      return null;
+    },
+  };
+
+  test("onSelect returning a string provides text to insert", () => {
+    const result = commandTrigger.onSelect!({ id: "c1", label: "Insert Date" });
+    expect(result).toBe("2026-02-23");
+  });
+
+  test("onSelect returning null indicates cancellation", () => {
+    const result = commandTrigger.onSelect!({ id: "c2", label: "Cancel" });
+    expect(result).toBeNull();
+  });
+
+  test("async onSelect resolves to a string", async () => {
+    const asyncTrigger: MentionTrigger<{ id: string; label: string }> = {
+      ...commandTrigger,
+      onSelect: async (cmd) => {
+        await new Promise((r) => setTimeout(r, 10));
+        return cmd.id === "c1" ? "async-result" : null;
+      },
+    };
+
+    const result = await asyncTrigger.onSelect!({ id: "c1", label: "Insert Date" });
+    expect(result).toBe("async-result");
+  });
+
+  test("async onSelect resolves to null for cancellation", async () => {
+    const asyncTrigger: MentionTrigger<{ id: string; label: string }> = {
+      ...commandTrigger,
+      onSelect: async () => {
+        await new Promise((r) => setTimeout(r, 10));
+        return null;
+      },
+    };
+
+    const result = await asyncTrigger.onSelect!({ id: "c2", label: "Cancel" });
+    expect(result).toBeNull();
   });
 });

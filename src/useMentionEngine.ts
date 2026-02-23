@@ -416,13 +416,55 @@ export function useMentionEngine(options: MentionEngineOptions) {
     [detectActiveTrigger, emitSync],
   );
 
+  // Look up a cached item for a mention
+  const getItemForMention = useCallback(
+    (triggerChar: string, key: string): unknown => {
+      const cache = getCache(triggerChar);
+      return cache.get(key) ?? null;
+    },
+    [],
+  );
+
   // Select an option from the dropdown
   const selectOption = useCallback(
     (item: unknown, textarea: HTMLTextAreaElement) => {
       if (!activeTrigger) return;
       const t = activeTrigger.trigger;
 
-      // Add to cache
+      if (t.onSelect) {
+        // Action trigger mode: close dropdown, remove trigger+query, call onSelect
+        const before = visible.slice(0, activeTrigger.startPos);
+        const after = visible.slice(textarea.selectionStart);
+        const savedStartPos = activeTrigger.startPos;
+
+        setActiveTrigger(null);
+
+        const result = t.onSelect(item);
+        const applyResult = (value: string | null) => {
+          if (value !== null) {
+            const newVis = before + value + after;
+            const pos = savedStartPos + value.length;
+            caretPosRef.current = pos;
+            setVisible(newVis);
+            emitSync(newVis);
+          } else {
+            // null = cancel, just remove the trigger+query
+            const newVis = before + after;
+            caretPosRef.current = savedStartPos;
+            setVisible(newVis);
+            emitSync(newVis);
+          }
+        };
+
+        if (result instanceof Promise) {
+          result.then(applyResult);
+        } else {
+          applyResult(result);
+        }
+        return;
+      }
+
+      // Standard mention mode
       const cache = getCache(t.trigger);
       const key = getItemKey(t, item);
       cache.set(key, item);
@@ -519,6 +561,7 @@ export function useMentionEngine(options: MentionEngineOptions) {
     rawToVisible,
     visibleToRaw,
     caretPosRef,
+    getItemForMention,
   };
 }
 

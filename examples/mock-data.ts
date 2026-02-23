@@ -34,6 +34,19 @@ export const TAGS: Tag[] = [
   { id: "t8", label: "refactor", color: "#95a5a6" },
 ];
 
+export interface Command {
+  id: string;
+  label: string;
+  description: string;
+}
+
+export const COMMANDS: Command[] = [
+  { id: "c1", label: "Insert Date", description: "Inserts the current date" },
+  { id: "c2", label: "Pick Emoji", description: "Opens an emoji picker" },
+  { id: "c3", label: "Fetch Quote", description: "Fetches a random quote" },
+  { id: "c4", label: "Cancel Demo", description: "Returns null (no insert)" },
+];
+
 // Simulated async user search with pagination
 const ALL_ASYNC_USERS: User[] = Array.from({ length: 100 }, (_, i) => ({
   id: `async-u${i + 1}`,

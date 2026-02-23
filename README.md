@@ -64,8 +64,10 @@ Defines how a trigger character activates suggestions and how mentions are seria
 | `options?` | `T[]` | Static options array (client-side filtering) |
 | `onSearch?` | `(query: string, page: number) => Promise<{ items: T[]; hasMore: boolean }>` | Async search with pagination |
 | `renderOption?` | `(item: T, highlighted: boolean) => ReactNode` | Custom option rendering |
-| `renderMention?` | `(displayText: string) => ReactNode` | Custom mention highlight rendering |
-| `mentionClassName?` | `string` | CSS class for highlighted mentions in the overlay |
+| `optionClassName?` | `string \| ((item: T) => string)` | CSS class for dropdown options, or a function for conditional styling per item |
+| `renderMention?` | `(displayText: string, item?: unknown) => ReactNode` | Custom mention highlight rendering |
+| `mentionClassName?` | `string \| ((mention: MentionItemData) => string)` | CSS class for highlighted mentions, or a function for conditional styling |
+| `onSelect?` | `(item: T) => Promise<string \| null> \| string \| null` | Action trigger: runs instead of inserting a mention. Returns text to insert or null to cancel. |
 
 ### `MentionInputProps`
 
@@ -84,7 +86,10 @@ Defines how a trigger character activates suggestions and how mentions are seria
 | `highlighterClassName?` | `string` | Highlighter overlay className |
 | `dropdownClassName?` | `string` | Dropdown className |
 | `dropdownWidth?` | `number` | Dropdown width in pixels (default: 250) |
+| `loadingText?` | `string` | Text shown while loading async results (default: `"Loading..."`) |
 | `renderDropdown?` | `(props: DropdownRenderProps) => ReactNode` | Full custom dropdown rendering |
+| `aria-label?` | `string` | Accessible label for the textarea |
+| `aria-describedby?` | `string` | ID of an element describing the textarea |
 
 ## Multiple Triggers
 
@@ -128,13 +133,14 @@ const engine = useMentionEngine({
   onChange: setValue,
 });
 
-// engine.visible        - display text
-// engine.mentions       - active mentions with positions
-// engine.activeTrigger  - currently active trigger (or null)
-// engine.filteredOptions - filtered suggestions
+// engine.visible          - display text
+// engine.mentions         - active mentions with positions
+// engine.activeTrigger    - currently active trigger (or null)
+// engine.filteredOptions  - filtered suggestions
 // engine.handleTextChange(text, caretPos)
 // engine.handleKeyDown(event, textarea)
 // engine.selectOption(item, textarea)
+// engine.getItemForMention(triggerChar, key) - look up cached item for a mention
 ```
 
 ## Styling
@@ -150,6 +156,69 @@ Mentionize uses a transparent textarea overlaid on a highlighted div. Apply styl
   triggers={[trigger]}
 />
 ```
+
+### Conditional Mention Styling
+
+Use a function for `mentionClassName` to style mentions dynamically based on the underlying item data:
+
+```tsx
+import type { MentionItemData } from "mentionize";
+
+const userTrigger: MentionTrigger<User> = {
+  trigger: "@",
+  mentionClassName: (mention: MentionItemData) => {
+    const user = mention.item as User;
+    switch (user?.role) {
+      case "Engineer": return "mention-engineer";
+      case "Designer": return "mention-designer";
+      case "PM":       return "mention-pm";
+      default:         return "mention-user";
+    }
+  },
+  // Apply the same conditional styling to dropdown options
+  optionClassName: (user) => {
+    switch (user.role) {
+      case "Engineer": return "mention-engineer";
+      case "Designer": return "mention-designer";
+      case "PM":       return "mention-pm";
+      default:         return "mention-user";
+    }
+  },
+  // ...other config
+};
+```
+
+The `MentionItemData` object contains `key`, `displayText`, `trigger`, and `item` (the original cached item). Use `optionClassName` (string or function receiving the item directly) to apply matching styles to dropdown options.
+
+### Action Triggers
+
+Use `onSelect` to create triggers that run an action instead of inserting a mention. The callback receives the selected item and returns a string to insert as plain text, or `null` to cancel:
+
+```tsx
+const commandTrigger: MentionTrigger<Command> = {
+  trigger: "/",
+  displayText: (cmd) => cmd.label,
+  // serialize/pattern/parseMatch still needed for the dropdown
+  serialize: (cmd) => `/[${cmd.label}](cmd:${cmd.id})`,
+  pattern: /\/\[([^\]]+)\]\(cmd:([^)]+)\)/g,
+  parseMatch: (match) => ({ displayText: match[1]!, key: match[2]! }),
+  options: [
+    { id: "date", label: "Insert Date" },
+    { id: "emoji", label: "Pick Emoji" },
+  ],
+  onSelect: async (cmd) => {
+    if (cmd.id === "date") return new Date().toLocaleDateString();
+    if (cmd.id === "emoji") {
+      // simulate async work
+      await new Promise((r) => setTimeout(r, 500));
+      return "🎉";
+    }
+    return null; // cancel — nothing inserted
+  },
+};
+```
+
+When `onSelect` is defined, selecting an option calls the function instead of inserting a mention. The trigger text and query are replaced by the returned string.
 
 Per-trigger mention highlights can be styled via `mentionClassName`:
 

@@ -80,6 +80,56 @@ code {
   padding: 0 2px;
 }
 
+.mention-engineer {
+  background: rgba(46, 204, 113, 0.2);
+  color: #2ecc71;
+  border-radius: 3px;
+  padding: 0 2px;
+}
+
+.mention-designer {
+  background: rgba(52, 152, 219, 0.2);
+  color: #3498db;
+  border-radius: 3px;
+  padding: 0 2px;
+}
+
+.mention-pm {
+  background: rgba(230, 126, 34, 0.2);
+  color: #e67e22;
+  border-radius: 3px;
+  padding: 0 2px;
+}
+
+/* Dropdown option conditional styles — apply a left border accent */
+[data-mentionize-dropdown] .mention-engineer {
+  border-left: 3px solid #2ecc71;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
+[data-mentionize-dropdown] .mention-designer {
+  border-left: 3px solid #3498db;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
+[data-mentionize-dropdown] .mention-pm {
+  border-left: 3px solid #e67e22;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
+[data-mentionize-dropdown] .mention-user {
+  border-left: 3px solid #a29bfe;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
 /* Dropdown styles */
 .mentionize-dropdown {
   background: #1e1e30;
