@@ -64,8 +64,8 @@ export interface MentionInputProps {
   dropdownClassName?: string;
   /** Dropdown width in pixels */
   dropdownWidth?: number;
-  /** Text shown while loading async results (default: "Loading...") */
-  loadingText?: string;
+  /** Content shown while loading async results (default: "Loading...") */
+  loadingContent?: React.ReactNode;
   /** Full custom dropdown rendering */
   renderDropdown?: (props: DropdownRenderProps) => React.ReactNode;
   "aria-label"?: string;

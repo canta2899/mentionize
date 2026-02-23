@@ -9,7 +9,7 @@ interface MentionDropdownProps {
   onSelect: (item: unknown) => void;
   onLoadMore?: () => void;
   loading: boolean;
-  loadingText?: string;
+  loadingContent?: React.ReactNode;
   position: CaretPosition;
   width: number;
   className?: string;
@@ -23,7 +23,7 @@ export const MentionDropdown: React.FC<MentionDropdownProps> = ({
   onSelect,
   onLoadMore,
   loading,
-  loadingText,
+  loadingContent,
   position,
   width,
   className,
@@ -133,7 +133,7 @@ export const MentionDropdown: React.FC<MentionDropdownProps> = ({
         );
       })}
       {loading && (
-        <div data-mentionize-loading="">{loadingText ?? "Loading..."}</div>
+        <div data-mentionize-loading="">{loadingContent ?? "Loading..."}</div>
       )}
       {onLoadMore && !loading && (
         <div ref={sentinelRef} style={{ height: 1 }} aria-hidden />

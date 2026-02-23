@@ -41,7 +41,7 @@ export const MentionInput = forwardRef<HTMLTextAreaElement, MentionInputProps>(
       highlighterClassName,
       dropdownClassName,
       dropdownWidth = 250,
-      loadingText,
+      loadingContent,
       renderDropdown,
       "aria-label": ariaLabel,
       "aria-describedby": ariaDescribedBy,
@@ -209,7 +209,7 @@ export const MentionInput = forwardRef<HTMLTextAreaElement, MentionInputProps>(
               onSelect={handleSelect}
               onLoadMore={engine.searchHasMore ? engine.loadMore : undefined}
               loading={engine.searchLoading}
-              loadingText={loadingText}
+              loadingContent={loadingContent}
               position={dropdownPos}
               width={dropdownWidth}
               className={dropdownClassName}

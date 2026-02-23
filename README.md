@@ -86,7 +86,7 @@ Defines how a trigger character activates suggestions and how mentions are seria
 | `highlighterClassName?` | `string` | Highlighter overlay className |
 | `dropdownClassName?` | `string` | Dropdown className |
 | `dropdownWidth?` | `number` | Dropdown width in pixels (default: 250) |
-| `loadingText?` | `string` | Text shown while loading async results (default: `"Loading..."`) |
+| `loadingContent?` | `ReactNode` | Content shown while loading async results (default: `"Loading..."`) |
 | `renderDropdown?` | `(props: DropdownRenderProps) => ReactNode` | Full custom dropdown rendering |
 | `aria-label?` | `string` | Accessible label for the textarea |
 | `aria-describedby?` | `string` | ID of an element describing the textarea |
