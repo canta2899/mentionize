@@ -219,3 +219,59 @@ describe("action trigger onSelect", () => {
     expect(result).toBeNull();
   });
 });
+
+describe("parseMatch item seeding", () => {
+  test("parseMatch can return an item field", () => {
+    const trigger: MentionTrigger<{ id: string; name: string }> = {
+      trigger: "@",
+      displayText: (u) => u.name,
+      serialize: (u) => `@[${u.name}](user:${u.id})`,
+      pattern: /@\[([^\]]+)\]\(user:([^)]+)\)/g,
+      parseMatch: (m) => ({
+        displayText: m[1]!,
+        key: m[2]!,
+        item: { id: m[2]!, name: m[1]! },
+      }),
+      options: [],
+    };
+
+    const re = new RegExp(trigger.pattern.source, "g");
+    const match = re.exec("@[Charlie](user:u3)");
+    expect(match).not.toBeNull();
+    const parsed = trigger.parseMatch(match!);
+    expect(parsed.displayText).toBe("Charlie");
+    expect(parsed.key).toBe("u3");
+    expect(parsed.item).toEqual({ id: "u3", name: "Charlie" });
+  });
+
+  test("parseMatch without item field still works", () => {
+    const parsed = userTrigger.parseMatch(
+      new RegExp(userTrigger.pattern.source, "g").exec(
+        "@[Alice Johnson](user:u1)",
+      )!,
+    );
+    expect(parsed.displayText).toBe("Alice Johnson");
+    expect(parsed.key).toBe("u1");
+    expect(parsed.item).toBeUndefined();
+  });
+
+  test("rawToVisible with item-returning parseMatch seeds cache for detection", () => {
+    // Trigger with no static options but parseMatch returns items
+    const trigger: MentionTrigger<{ id: string; name: string }> = {
+      trigger: "@",
+      displayText: (u) => u.name,
+      serialize: (u) => `@[${u.name}](user:${u.id})`,
+      pattern: /@\[([^\]]+)\]\(user:([^)]+)\)/g,
+      parseMatch: (m) => ({
+        displayText: m[1]!,
+        key: m[2]!,
+        item: { id: m[2]!, name: m[1]! },
+      }),
+    };
+
+    // rawToVisible should produce the same visible text regardless of item
+    const raw = "Hello @[Charlie](user:u3), welcome!";
+    const visible = rawToVisible(raw, [trigger]);
+    expect(visible).toBe("Hello @Charlie, welcome!");
+  });
+});

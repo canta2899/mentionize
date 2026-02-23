@@ -60,7 +60,7 @@ Defines how a trigger character activates suggestions and how mentions are seria
 | `displayText` | `(item: T) => string` | Converts an item to its visible text |
 | `serialize` | `(item: T) => string` | Converts an item to its serialized form in the raw value |
 | `pattern` | `RegExp` | Regex to detect serialized mentions (must use global flag) |
-| `parseMatch` | `(match: RegExpExecArray) => { displayText: string; key: string }` | Parses a regex match back into display text and key |
+| `parseMatch` | `(match: RegExpExecArray) => { displayText: string; key: string; item?: T }` | Parses a regex match back into display text and key. Optionally returns `item` to seed the engine cache. |
 | `options?` | `T[]` | Static options array (client-side filtering) |
 | `onSearch?` | `(query: string, page: number) => Promise<{ items: T[]; hasMore: boolean }>` | Async search with pagination |
 | `renderOption?` | `(item: T, highlighted: boolean) => ReactNode` | Custom option rendering |
@@ -119,6 +119,43 @@ const trigger: MentionTrigger<User> = {
   },
 };
 ```
+
+## Cache Seeding via `parseMatch`
+
+By default the engine only recognizes mentions whose items are already cached (from `options`, `onSearch` results, or previous selections). When a mention is injected externally — for example by a `/` command picker or when loading initial content containing mentions for items that haven't been searched yet — the cache may not contain the underlying item, so the mention won't be highlighted or serialized.
+
+To solve this, `parseMatch` can optionally return an `item` field. When present, the engine seeds its internal cache with that item during raw-to-visible parsing, making the mention immediately detectable:
+
+```tsx
+const modelTrigger: MentionTrigger<Model> = {
+  trigger: "@",
+  displayText: (model) => model.label,
+  serialize: (model) => `@[${model.label}](model:${model.id})`,
+  pattern: /@\[([^\]]+)\]\(model:([^)]+)\)/g,
+  parseMatch: (match) => {
+    const id = match[2]!;
+    const label = match[1]!;
+    // Look up the item from your own data source
+    const cached = myModelCache.get(id);
+    return {
+      displayText: label,
+      key: id,
+      item: cached, // if defined, seeds the engine cache
+    };
+  },
+  onSearch: async (query, page) => {
+    const res = await fetch(`/api/models?q=${query}&page=${page}`);
+    return res.json();
+  },
+};
+```
+
+This is useful when:
+- A command picker (e.g. `/` trigger with `onSelect`) injects a mention into the input
+- The input is initialized with raw text containing mentions for items not in `options`
+- Items are known at parse time but haven't been searched via `onSearch` yet
+
+The `item` field is optional and fully backward-compatible — existing `parseMatch` implementations that only return `displayText` and `key` continue to work unchanged.
 
 ## Headless Usage
 

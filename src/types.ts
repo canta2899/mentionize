@@ -16,8 +16,11 @@ export interface MentionTrigger<T = unknown> {
   serialize: (item: T) => string;
   /** Regex to detect serialized mentions in raw text. Must use global flag. */
   pattern: RegExp;
-  /** Parse a regex match back into display text and a unique key */
-  parseMatch: (match: RegExpExecArray) => { displayText: string; key: string };
+  /** Parse a regex match back into display text and a unique key.
+   *  Optionally return `item` to seed the engine cache — useful when
+   *  mentions are injected externally (e.g. via a command picker) and
+   *  the item wouldn't otherwise be in cache at parse time. */
+  parseMatch: (match: RegExpExecArray) => { displayText: string; key: string; item?: T };
   /** Static options array */
   options?: T[];
   /** Async search fetcher with pagination */

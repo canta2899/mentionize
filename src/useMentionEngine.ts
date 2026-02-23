@@ -188,8 +188,12 @@ export function useMentionEngine(options: MentionEngineOptions) {
           const parsed = t.parseMatch(m);
           // Cache the item data from the match
           const cache = getCache(t.trigger);
-          // placeholder for unmatched items
-          if (!cache.has(parsed.key)) {
+          // If parseMatch returned an item, seed the cache (replaces null placeholders too)
+          if (parsed.item !== undefined) {
+            if (!cache.has(parsed.key) || cache.get(parsed.key) === null) {
+              cache.set(parsed.key, parsed.item);
+            }
+          } else if (!cache.has(parsed.key)) {
             cache.set(parsed.key, null);
           }
           parts.push(t.trigger + parsed.displayText);
