@@ -35,11 +35,13 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-          node-version: '22'
-          registry-url: 'https://registry.npmjs.org'
       - name: Install dependencies
         run: bun install --frozen-lockfile
       - name: Build
         run: bun run build
       - name: Publish to npm
-        run: npm publish --access public --provenance
+        run: |
+          npm config set //registry.npmjs.org/:_authToken=unused
+          npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
