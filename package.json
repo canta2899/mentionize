@@ -1,7 +1,7 @@
 {
   "name": "mentionize",
   "author": "canta2899",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A dependency-free React mention input with support for multiple triggers, async search, and full customization",
   "type": "module",
   "main": "./dist/cjs/index.js",
