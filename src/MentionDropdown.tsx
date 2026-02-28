@@ -13,6 +13,8 @@ interface MentionDropdownProps {
   position: CaretPosition;
   width: number;
   className?: string;
+  positionStrategy?: "fixed" | "absolute";
+  containerEl?: HTMLElement | null;
 }
 
 export const MentionDropdown: React.FC<MentionDropdownProps> = ({
@@ -27,6 +29,8 @@ export const MentionDropdown: React.FC<MentionDropdownProps> = ({
   position,
   width,
   className,
+  positionStrategy = "fixed",
+  containerEl,
 }) => {
   const listRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -61,22 +65,40 @@ export const MentionDropdown: React.FC<MentionDropdownProps> = ({
     }
   }, [highlightedIndex]);
 
-  // flip above if near bottom of viewport
+  // flip above if near bottom of viewport (always viewport-based)
   const maxHeight = 240;
   const gap = 4;
   const spaceBelow = window.innerHeight - position.top - gap;
   const flipAbove = spaceBelow < maxHeight && position.top > maxHeight;
 
-  const style: React.CSSProperties = {
-    position: "fixed",
-    width,
-    maxHeight,
-    overflowY: "auto",
-    zIndex: 50,
-    ...(flipAbove
-      ? { bottom: window.innerHeight - position.top + gap, left: position.left }
-      : { top: position.top + gap, left: position.left }),
-  };
+  let style: React.CSSProperties;
+  if (positionStrategy === "absolute" && containerEl) {
+    const rect = containerEl.getBoundingClientRect();
+    const relLeft = position.left - rect.left;
+    const relTop = flipAbove
+      ? position.top - gap - maxHeight - rect.top
+      : position.top + gap - rect.top;
+    style = {
+      position: "absolute",
+      width,
+      maxHeight,
+      overflowY: "auto",
+      zIndex: 50,
+      top: relTop,
+      left: relLeft,
+    };
+  } else {
+    style = {
+      position: "fixed",
+      width,
+      maxHeight,
+      overflowY: "auto",
+      zIndex: 50,
+      ...(flipAbove
+        ? { bottom: window.innerHeight - position.top + gap, left: position.left }
+        : { top: position.top + gap, left: position.left }),
+    };
+  }
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     e.preventDefault(); // prevent blur of input

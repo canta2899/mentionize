@@ -43,12 +43,14 @@ export const MentionInput = forwardRef<HTMLTextAreaElement, MentionInputProps>(
       dropdownWidth = 250,
       loadingContent,
       renderDropdown,
+      dropdownPositionStrategy = "fixed",
       "aria-label": ariaLabel,
       "aria-describedby": ariaDescribedBy,
     },
     ref
   ) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
     useImperativeHandle(ref, () => textareaRef.current!);
 
     const engine = useMentionEngine({
@@ -134,6 +136,7 @@ export const MentionInput = forwardRef<HTMLTextAreaElement, MentionInputProps>(
 
     return (
       <div
+        ref={containerRef}
         className={className}
         style={{ position: "relative" }}
         data-mentionize-container=""
@@ -213,6 +216,8 @@ export const MentionInput = forwardRef<HTMLTextAreaElement, MentionInputProps>(
               position={dropdownPos}
               width={dropdownWidth}
               className={dropdownClassName}
+              positionStrategy={dropdownPositionStrategy}
+              containerEl={dropdownPositionStrategy === "absolute" ? containerRef.current : undefined}
             />
           )
         )}

@@ -96,6 +96,7 @@ Defines how a trigger character activates suggestions and how mentions are seria
 | `dropdownWidth?` | `number` | Dropdown width in pixels (default: 250) |
 | `loadingContent?` | `ReactNode` | Content shown while loading async results (default: `"Loading..."`) |
 | `renderDropdown?` | `(props: DropdownRenderProps) => ReactNode` | Full custom dropdown rendering |
+| `dropdownPositionStrategy?` | `"fixed" \| "absolute"` | Positioning strategy for the dropdown (default: `"fixed"`). Use `"absolute"` inside CSS-transformed ancestors such as modals — see [Modals & CSS Transforms](#modals--css-transforms). |
 | `aria-label?` | `string` | Accessible label for the textarea |
 | `aria-describedby?` | `string` | ID of an element describing the textarea |
 
@@ -127,6 +128,27 @@ const trigger: MentionTrigger<User> = {
   },
 };
 ```
+
+## Modals & CSS Transforms
+
+Browsers create a new containing block for `position: fixed` elements when any ancestor has a CSS `transform` applied. This is a known browser behaviour that affects many libraries — the canonical example is a modal centred with `transform: translate(-50%, -50%)`, which causes any `position: fixed` child (including the suggestion dropdown) to be positioned relative to the modal rather than the viewport, placing it far off-screen.
+
+Use `dropdownPositionStrategy="absolute"` to switch the dropdown to `position: absolute`, anchoring it to the `position: relative` container that `MentionInput` already renders internally:
+
+```tsx
+<Dialog>
+  <DialogContent> {/* has transform: translate(-50%, -50%) */}
+    <MentionInput
+      dropdownPositionStrategy="absolute"
+      triggers={[userTrigger]}
+      value={value}
+      onChange={setValue}
+    />
+  </DialogContent>
+</Dialog>
+```
+
+The default is `"fixed"`, so all existing usage outside of transformed ancestors is unaffected.
 
 ## Cache Seeding via `parseMatch`
 

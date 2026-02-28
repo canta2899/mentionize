@@ -68,6 +68,12 @@ export interface MentionInputProps {
   loadingContent?: React.ReactNode;
   /** Full custom dropdown rendering */
   renderDropdown?: (props: DropdownRenderProps) => React.ReactNode;
+  /**
+   * How the dropdown is positioned. Use `"absolute"` when MentionInput is
+   * inside a CSS-transformed ancestor (e.g. a modal with translate(-50%,-50%)),
+   * because `position: fixed` is broken by CSS transforms. Defaults to `"fixed"`.
+   */
+  dropdownPositionStrategy?: "fixed" | "absolute";
   "aria-label"?: string;
   "aria-describedby"?: string;
 }
