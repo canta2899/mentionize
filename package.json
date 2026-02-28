@@ -52,7 +52,7 @@
   "scripts": {
     "dev": "bun --hot examples/server.ts",
     "build": "bun run build:esm && bun run build:cjs && bun run build:types",
-    "build:esm": "bun build ./src/index.ts --outdir=dist/esm --target=browser --format=esm --external react --external react-dom --sourcemap",
+    "build:esm": "NODE_ENV=production bun build ./src/index.ts --outdir=dist/esm --target=browser --format=esm --external react --external react-dom --sourcemap",
     "build:cjs": "bun build ./src/index.ts --outdir=dist/cjs --target=browser --format=cjs --external react --external react-dom --sourcemap",
     "build:types": "tsc -p tsconfig.build.json && cp dist/esm/*.d.ts dist/cjs/",
     "test": "bun test",
